@@ -71,7 +71,7 @@ pub enum MessageKind {
     Kick { room_id: RoomId, user_id: UserId, token: String },
 
     /// Indicates that a client wishes to subscribe to traffic described by the given subscription specification.
-    Subscribe { what: Subscription },
+    // Subscribe { what: Subscription },
 
     /// Indicates that a given user should be blocked from receiving your traffic, and that you should not
     /// receive their traffic (superseding any subscriptions you have.)
@@ -163,20 +163,20 @@ mod tests {
             );
         }
 
-        #[test]
-        fn parse_subscribe() {
-            let json = r#"{"kind": "subscribe", "what": {"notifications": false, "data": true, "media": "steve"}}"#;
-            let result: MessageKind = serde_json::from_str(json).unwrap();
-            assert_eq!(
-                result,
-                MessageKind::Subscribe {
-                    what: Subscription {
-                        notifications: false,
-                        data: true,
-                        media: Some("steve".into())
-                    }
-                }
-            );
-        }
+        // #[test]
+        // fn parse_subscribe() {
+        //     let json = r#"{"kind": "subscribe", "what": {"notifications": false, "data": true, "media": "steve"}}"#;
+        //     let result: MessageKind = serde_json::from_str(json).unwrap();
+        //     assert_eq!(
+        //         result,
+        //         MessageKind::Subscribe {
+        //             what: Subscription {
+        //                 notifications: false,
+        //                 data: true,
+        //                 media: Some("steve".into())
+        //             }
+        //         }
+        //     );
+        // }
     }
 }
