@@ -33,6 +33,14 @@ cd janus-docker
 docker build --pull -t janus:latest .
 ```
 
+If you previously built the image and want to rebuild with latest janus-plugin-sfu, be sure to increment the
+version in Dockerfile for the janus-plugin-sfu RUN command to invalidate the cache of this layer
+or add `--no-cache` option when building the image:
+
+```
+docker build --pull --no-cache -t janus:latest .
+```
+
 start the container:
 
 ```
@@ -65,6 +73,14 @@ create the docker image:
 ```
 docker-compose build --pull
 ```
+
+or
+
+```
+docker-compose build --pull --no-cache
+```
+
+to rebuild with latest janus-plugin-sfu changes.
 
 configure environment variables in `.env`, example:
 
