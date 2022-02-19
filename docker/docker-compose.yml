@@ -1,0 +1,17 @@
+version: "3.7"
+services:
+  janus:
+    network_mode: host
+    restart: always
+    build: .
+    image: janus:latest
+    environment:
+      - ADMIN_SECRET
+      - DEBUG_LEVEL
+      - MAX_CCU
+      - MAX_ROOM_SIZE
+      - MESSAGE_THREADS
+      - SESSION_TIMEOUT
+#      - AUTH_KEY=/keys/public.der 
+#    volumes:
+#      - ./public.der:/keys/public.der:ro

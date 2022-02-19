@@ -1,3 +1,5 @@
+# Deployment with a docker image
+
 If you previously installed janus on the host with systemd, stop it and disable it:
 
 ```
@@ -5,23 +7,9 @@ systemctl stop janus
 systemctl disable janus
 ```
 
-create the docker image:
-
-```
-cd janus-docker
-docker build --pull -t janus:latest .
-```
-
-start the container:
-
-```
-docker run -d --restart always --net=host --name="janus" janus:latest
-```
-
-Be aware that ports 7088 (admin http) and 8188 (ws) are exposed to the host network interface.
-So be sure to configure your instance security group properly to not have access to
-those ports externally and configure traefik or nginx for example in front that
-handle the TLS termination.
+Be aware that ports 7088 (admin http with default janusoverlord password) and 8188 (ws) are exposed to the host network interface.
+So be sure to change the password and configure your instance security group properly to not have access to
+those ports externally and configure traefik or nginx for example in front that handle the TLS termination.
 
 Those environment variables with default values are available:
 
@@ -34,7 +22,18 @@ MAX_CCU=1000
 MESSAGE_THREADS=0
 ```
 
-For example to limit rooms to 15 users:
+The default values are defined at the beginning of the `start.sh` script.
+
+## Using docker
+
+create the docker image:
+
+```
+cd janus-docker
+docker build --pull -t janus:latest .
+```
+
+start the container:
 
 ```
 docker run -d --restart always --net=host --name="janus" -e MAX_ROOM_SIZE=15 -e ADMIN_SECRET=YourOwnPassword janus:latest
@@ -43,13 +42,7 @@ docker run -d --restart always --net=host --name="janus" -e MAX_ROOM_SIZE=15 -e 
 If you secure the rooms with JWT, specify the public key like this:
 
 ```
--e AUTH_KEY=/keys/public.der -v ./public.der:/keys/public.der:ro
-```
-
-so:
-
-```
-docker run -d --restart always --net=host --name="janus" -e MAX_ROOM_SIZE=15 -e ADMIN_SECRET=YourOwnPassword -e AUTH_KEY=/keys/public.der -v ./public.der:/keys/public.der:ro janus:latest
+docker run -d --restart always --net=host --name="janus" -e MAX_ROOM_SIZE=15 -e ADMIN_SECRET=YourOwnPassword -e AUTH_KEY=/keys/public.der -v $PWD/public.der:/keys/public.der:ro janus:latest
 ```
 
 look at the logs:
@@ -63,4 +56,39 @@ stop and remove the container:
 ```
 docker stop janus
 docker rm janus
+```
+
+## Using docker-compose
+
+create the docker image:
+
+```
+docker-compose build --pull
+```
+
+configure environment variables in `.env`, example:
+
+```
+ADMIN_SECRET=YourOwnPassword
+MAX_ROOM_SIZE=15
+```
+
+start the container:
+
+```
+docker-compose up -d
+```
+
+If you secure the rooms with JWT, uncomment the AUTH_KEY variable and volume in `docker-compose.yml`.
+
+look at the logs:
+
+```
+docker-compose logs -f
+```
+
+stop and remove the container:
+
+```
+docker-compose down
 ```
