@@ -1,5 +1,14 @@
 # Deployment with a docker image
 
+This Dockerfile is based on the instructions of the
+[Janus deployment on Ubuntu 20.04](https://github.com/networked-aframe/naf-janus-adapter/blob/master/docs/janus-deployment.md)
+documentation in naf-janus-adapter repository. The janus-gateway version and
+janus-plugin-sfu version used may slightly diverge though.
+
+You can follow the steps in the above documentation to install a server, then
+instead of following the "Build it", "Configure it" and "Start janus as a
+service", use the docker image described below.
+
 If you previously installed janus on the host with systemd, stop it and disable it:
 
 ```
@@ -9,7 +18,7 @@ systemctl disable janus
 
 Be aware that ports 7088 (admin http with default janusoverlord password) and 8188 (ws) are exposed to the host network interface.
 So be sure to change the password and configure your instance security group properly to not have access to
-those ports externally and configure traefik or nginx for example in front that handle the TLS termination.
+those ports externally and configure nginx in front that handle the TLS termination.
 
 Those environment variables with default values are available:
 
@@ -33,9 +42,12 @@ cd janus-docker
 docker build --pull -t janus:latest .
 ```
 
-If you previously built the image and want to rebuild with latest janus-plugin-sfu, be sure to increment the
-version in Dockerfile for the janus-plugin-sfu RUN command to invalidate the cache of this layer
-or add `--no-cache` option when building the image:
+If you previously built the image and want to rebuild with latest janus-plugin-sfu,
+in the Dockerfile on the RUN janus-plugin-sfu line be sure to increment the version
+in the echo command so the layer cache of the RUN command is invalidated. This
+is a trick so the rebuild is quicker if the base image didn't change.
+Or simply add `--no-cache` option when building the image but it takes more time to
+rebuild like it was the first time:
 
 ```
 docker build --pull --no-cache -t janus:latest .
