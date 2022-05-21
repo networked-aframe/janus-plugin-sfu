@@ -45,3 +45,5 @@ You can test your install by pointing a browser at the `tiny.html` client provid
 ## Using it with networked-aframe
 
 You can use this plugin with [A-Frame](https://aframe.io) and [networked-aframe](https://github.com/networked-aframe/networked-aframe). Look at the [adapters table](https://github.com/networked-aframe/networked-aframe#adapters) for a maintained version of the naf-janus-adapter.
+
+See [docker](docker/) folder in this repository to build a docker image.
