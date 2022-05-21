@@ -38,7 +38,7 @@ The default values are defined at the beginning of the `start.sh` script.
 create the docker image:
 
 ```
-cd janus-docker
+cd docker
 docker build --pull -t janus:latest .
 ```
 
