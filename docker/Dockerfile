@@ -77,7 +77,7 @@ RUN git clone -b 0.x https://github.com/meetecho/janus-gateway.git && \
     cd / && rm -rf janus-gateway
 
 
-RUN git clone -b disable-subscribe-message https://github.com/networked-aframe/janus-plugin-sfu.git && \
+RUN git clone -b master https://github.com/networked-aframe/janus-plugin-sfu.git && \
     cd janus-plugin-sfu && \
     echo version 2 increment this line to invalidate cache of this layer while iterating build during development && \
     cargo build --release && \
