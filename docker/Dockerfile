@@ -1,4 +1,12 @@
 FROM ubuntu:20.04
+# If you want to build the docker image on Raspberry Pi OS (based on debian bullseye)
+# and then copy the build artifacts on the host to run janus without docker,
+# comment "FROM ubuntu:20.04" and uncomment those two lines:
+# FROM debian:bullseye
+# RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal
+# Installing rustup is needed to have a recent cargo version (1.61.0),
+# ubuntu:20.04 uses cargo 1.57.0 that is recent enough, but debian:bullseye uses cargo 1.46.0
+# that has an issue that produces the error "error inflating zlib stream; class=Zlib" when getting crate dependencies.
 
 RUN apt-get -y update && DEBIAN_FRONTEND="noninteractive" TZ="Europe/Paris" apt-get -y upgrade
 RUN apt-get -y update && DEBIAN_FRONTEND="noninteractive" TZ="Europe/Paris" apt-get install -y libmicrohttpd-dev \
