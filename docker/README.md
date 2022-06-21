@@ -33,6 +33,10 @@ MESSAGE_THREADS=0
 
 The default values are defined at the beginning of the `start.sh` script.
 
+## Installing docker
+
+see https://docs.docker.com/engine/install/ubuntu/
+
 ## Using docker
 
 create the docker image:
@@ -78,18 +82,18 @@ docker stop janus
 docker rm janus
 ```
 
-## Using docker-compose
+## Using docker compose
 
 create the docker image:
 
 ```
-docker-compose build --pull
+docker compose build --pull
 ```
 
 or
 
 ```
-docker-compose build --pull --no-cache
+docker compose build --pull --no-cache
 ```
 
 to rebuild with latest janus-plugin-sfu changes.
@@ -104,7 +108,7 @@ MAX_ROOM_SIZE=15
 start the container:
 
 ```
-docker-compose up -d
+docker compose up -d
 ```
 
 If you secure the rooms with JWT, uncomment the AUTH_KEY variable and volume in `docker-compose.yml`.
@@ -112,11 +116,11 @@ If you secure the rooms with JWT, uncomment the AUTH_KEY variable and volume in 
 look at the logs:
 
 ```
-docker-compose logs -f
+docker compose logs -f
 ```
 
 stop and remove the container:
 
 ```
-docker-compose down
+docker compose down
 ```
