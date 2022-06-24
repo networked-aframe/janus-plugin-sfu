@@ -33,7 +33,7 @@ RUN apt-get -y update && DEBIAN_FRONTEND="noninteractive" TZ="Europe/Paris" apt-
     iproute2
 
 
-RUN LIBWEBSOCKET="3.2.3" && wget https://github.com/warmcat/libwebsockets/archive/v$LIBWEBSOCKET.tar.gz && \
+RUN LIBWEBSOCKET="4.3.2" && wget https://github.com/warmcat/libwebsockets/archive/v$LIBWEBSOCKET.tar.gz && \
     tar xzvf v$LIBWEBSOCKET.tar.gz && \
     cd libwebsockets-$LIBWEBSOCKET && \
     mkdir build && \
@@ -43,7 +43,7 @@ RUN LIBWEBSOCKET="3.2.3" && wget https://github.com/warmcat/libwebsockets/archiv
     cd / && rm -rf libwebsockets-$LIBWEBSOCKET
 
 
-RUN SRTP="2.3.0" && wget https://github.com/cisco/libsrtp/archive/v$SRTP.tar.gz && \
+RUN SRTP="2.4.2" && wget https://github.com/cisco/libsrtp/archive/v$SRTP.tar.gz && \
     tar xfv v$SRTP.tar.gz && \
     cd libsrtp-$SRTP && \
     ./configure --prefix=/usr --enable-openssl && \
