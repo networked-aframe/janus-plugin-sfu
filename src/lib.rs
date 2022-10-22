@@ -230,7 +230,7 @@ fn send_fir<T: IntoIterator<Item = U>, U: AsRef<Session>>(publishers: T) {
         let mut packet = PluginRtcpPacket {
             video: 1,
             buffer: fir.as_mut_ptr(),
-            length: fir.len() as i16,
+            length: fir.len() as u16,
         };
         relay_rtcp(publisher.as_ref().as_ptr(), &mut packet);
     }
@@ -796,7 +796,7 @@ extern "C" fn handle_admin_message(_message: *mut RawJanssonValue) -> *mut RawJa
 
 static PLUGIN: Plugin = build_plugin!(
     LibraryMetadata {
-        api_version: 16,
+        api_version: 17,
         version: 1,
         name: c_str!("Janus SFU plugin"),
         package: c_str!("janus.plugin.sfu"),
