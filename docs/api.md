@@ -121,11 +121,16 @@ you use the Join message to subscribe to other users, not this message.
 {
     "kind": "subscribe",
     "what": {
+        "notifications": [none|boolean],
+        "data": [none|boolean],
         "media": [none|user ID]
     },
     "token": [none|string]
 }
 ```
+
+`notifications` and `data` are completely ignored here. Those flags are only
+checked for a publisher connection with the Join message.
 
 If `media` is a user ID, the server will respond with a JSEP offer which you can use to establish a connection suitable to receive audio and video RTP data coming from that user ID.
 
