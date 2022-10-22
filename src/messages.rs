@@ -88,7 +88,7 @@ pub enum MessageKind {
 #[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize)]
 #[serde(default)]
 pub struct Subscription {
-    /// Whether to subscribe to server-wide notifications (e.g. user joins and leaves, room creates and destroys).
+    /// Whether to subscribe to server-wide notifications (e.g. user joins and leaves, someone blocked/unblocked you).
     pub notifications: bool,
 
     /// Whether to subscribe to data in the currently-joined room.
