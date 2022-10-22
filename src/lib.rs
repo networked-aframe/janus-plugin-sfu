@@ -230,7 +230,7 @@ fn send_fir<T: IntoIterator<Item = U>, U: AsRef<Session>>(publishers: T) {
         let mut packet = PluginRtcpPacket {
             video: 1,
             buffer: fir.as_mut_ptr(),
-            length: fir.len() as i16,
+            length: fir.len() as u16,
         };
         relay_rtcp(publisher.as_ref().as_ptr(), &mut packet);
     }

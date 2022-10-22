@@ -116,12 +116,12 @@ checksum = "112c678d4050afce233f4f2852bb2eb519230b3cf12f33585275537d7e41578d"
 [[package]]
 name = "jansson-sys"
 version = "0.1.0"
-source = "git+https://github.com/networked-aframe/janus-plugin-rs?branch=api-v17#fe26a6cc12329c14495f1d27f728b0b6edb08adc"
+source = "git+https://github.com/networked-aframe/janus-plugin-rs?branch=api-v17+#47f72be87b1e944f13cf2281fdee892f154dd8ed"
 
 [[package]]
 name = "janus-plugin"
 version = "0.13.0"
-source = "git+https://github.com/networked-aframe/janus-plugin-rs?branch=api-v17#fe26a6cc12329c14495f1d27f728b0b6edb08adc"
+source = "git+https://github.com/networked-aframe/janus-plugin-rs?branch=api-v17+#47f72be87b1e944f13cf2281fdee892f154dd8ed"
 dependencies = [
  "bitflags",
  "chrono",
@@ -149,7 +149,7 @@ dependencies = [
 [[package]]
 name = "janus-plugin-sys"
 version = "0.8.0"
-source = "git+https://github.com/networked-aframe/janus-plugin-rs?branch=api-v17#fe26a6cc12329c14495f1d27f728b0b6edb08adc"
+source = "git+https://github.com/networked-aframe/janus-plugin-rs?branch=api-v17+#47f72be87b1e944f13cf2281fdee892f154dd8ed"
 dependencies = [
  "glib-sys",
  "jansson-sys",
