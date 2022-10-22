@@ -71,7 +71,7 @@ pub enum MessageKind {
     Kick { room_id: RoomId, user_id: UserId, token: String },
 
     /// Indicates that a client wishes to subscribe to traffic described by the given subscription specification.
-    Subscribe { what: Subscription },
+    Subscribe { what: Subscription, token: Option<String> },
 
     /// Indicates that a given user should be blocked from receiving your traffic, and that you should not
     /// receive their traffic (superseding any subscriptions you have.)
@@ -174,7 +174,8 @@ mod tests {
                         notifications: false,
                         data: true,
                         media: Some("steve".into())
-                    }
+                    },
+                    token: None
                 }
             );
         }
