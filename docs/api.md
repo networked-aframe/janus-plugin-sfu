@@ -117,7 +117,7 @@ Kick another user from the room. You need a token with the `kick_users: true` cl
     "kind": "kick",
     "room_id": room ID,
     "user_id": user ID,
-    "token": [none|string]
+    "token": [string]
 }
 ```
 
