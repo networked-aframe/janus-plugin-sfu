@@ -25,5 +25,5 @@ jsonwebtoken = "7.0"
 num_cpus = "1.12.0"
 
 [patch.crates-io]
-janus-plugin-sys = { git = "https://github.com/networked-aframe/janus-plugin-rs", branch = "api-v17+" }
-janus-plugin = { git = "https://github.com/networked-aframe/janus-plugin-rs", branch = "api-v17+" }
+janus-plugin-sys = { git = "https://github.com/networked-aframe/janus-plugin-rs", branch = "master" }
+janus-plugin = { git = "https://github.com/networked-aframe/janus-plugin-rs", branch = "master" }
