@@ -31,6 +31,13 @@ MAX_CCU=1000
 MESSAGE_THREADS=0
 ```
 
+In order to take advantage of event loops / loop indication, the respective environment variables are available:
+
+``` 
+EVENT_LOOPS="true"
+ALLOW_LOOP_INDICATION="true"
+```
+
 The default values are defined at the beginning of the `start.sh` script.
 
 ## Installing docker

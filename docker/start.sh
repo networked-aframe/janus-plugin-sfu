@@ -43,6 +43,18 @@ if [ ! -z "$AUTH_KEY" ]; then
         /usr/etc/janus/janus.plugin.sfu.cfg
 fi
 
+if [ ! -z "$EVENT_LOOPS" ]; then
+    sed -i \
+        -e "s|#event_loops =.*|event_loops = ${EVENT_LOOPS}|" \
+        /usr/etc/janus/janus.jcfg
+fi
+
+if [ ! -z "$ALLOW_LOOP_INDICATION" ]; then
+    sed -i \
+        -e "s|#allow_loop_indication =.*|allow_loop_indication = ${ALLOW_LOOP_INDICATION}|" \
+        /usr/etc/janus/janus.cfg
+fi
+
 MAX_ROOM_SIZE=${MAX_ROOM_SIZE:-30}
 MAX_CCU=${MAX_CCU:-1000}
 MESSAGE_THREADS=${MESSAGE_THREADS:-0}
