@@ -12,6 +12,8 @@ services:
       - MAX_ROOM_SIZE
       - MESSAGE_THREADS
       - SESSION_TIMEOUT
+      - EVENT_LOOPS
+      - ALLOW_LOOP_INDICATION
 #      - AUTH_KEY=/keys/public.der 
 #    volumes:
 #      - ./public.der:/keys/public.der:ro
