@@ -31,14 +31,38 @@ MAX_CCU=1000
 MESSAGE_THREADS=0
 ```
 
-In order to take advantage of event loops / loop indication, the respective environment variables are available:
+The default values are defined at the beginning of the `start.sh` script.
 
-``` 
-EVENT_LOOPS="true"
-ALLOW_LOOP_INDICATION="true"
+[naf-janus-adapter 3.1.0](https://github.com/networked-aframe/naf-janus-adapter/releases/tag/v3.1.0) allows to specify the number of event loops you configured janus (generally the number of CPU you have on the server) and it will use the same event loop (thread) for the janus handle (RTCPeerConnection) when participants subscribe to a publisher, so the broadcasting of packets is on the same thread and avoid cpu context switching, this gives better CPU usage on a room with 30 users sending data/audio/video. See the [original janus PR that introduced these options](https://github.com/meetecho/janus-gateway/pull/2450) if you're curious.
+In order to take advantage of this perf boost, you can set the following environment variables:
+
+```
+EVENT_LOOPS=8
+ALLOW_LOOP_INDICATION=true
 ```
 
-The default values are defined at the beginning of the `start.sh` script.
+Here 8 in the number of cpus on the server.
+You need to specify the same value with `adapter.setEventLoops(8)` when using naf-janus-adapter. Here is the relevant part (mic handling excluded):
+
+```js
+function genClientId() {
+  return String(crypto.getRandomValues(new Uint32Array(1))[0]);
+}
+document.addEventListener("DOMContentLoaded", () => {
+  const scene = document.querySelector("a-scene");
+  scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
+    const clientId = genClientId();
+    adapter.setClientId(clientId);
+    adapter.setEventLoops(8);
+    // ...
+  });
+});
+```
+
+The naf adapter is using `loop_index = parseInt(clientId) % loops` (only if you called `setEventLoops`) to set the
+the loop index (0 to 7) to use for a publisher WebRTC connection and all their subscribers WebRTC connection.
+The `clientId` generation is important here to have the users well distributed among the available loops.
+The above `genClientId` function worked well enough in our tests.
 
 ## Installing docker
 
