@@ -8,7 +8,6 @@ FROM ubuntu:20.04
 # ubuntu:20.04 uses cargo 1.57.0 that is recent enough, but debian:bullseye uses cargo 1.46.0
 # that has an issue that produces the error "error inflating zlib stream; class=Zlib" when getting crate dependencies.
 
-RUN apt-get -y update && DEBIAN_FRONTEND="noninteractive" TZ="Europe/Paris" apt-get -y upgrade
 RUN apt-get -y update && DEBIAN_FRONTEND="noninteractive" TZ="Europe/Paris" apt-get install -y libmicrohttpd-dev \
     libjansson-dev \
     libssl-dev \
@@ -30,7 +29,10 @@ RUN apt-get -y update && DEBIAN_FRONTEND="noninteractive" TZ="Europe/Paris" apt-
     cargo \
     wget \
     curl \
-    iproute2
+    iproute2 && \
+    apt-get -y --no-install-recommends install ninja-build meson gtk-doc-tools libgnutls28-dev && \
+    apt-get remove -y libnice-dev libnice10 && \
+    rm -rf /var/lib/apt/lists/*
 
 
 RUN LIBWEBSOCKET="4.3.2" && wget https://github.com/warmcat/libwebsockets/archive/v$LIBWEBSOCKET.tar.gz && \
@@ -52,10 +54,9 @@ RUN SRTP="2.4.2" && wget https://github.com/cisco/libsrtp/archive/v$SRTP.tar.gz 
 
 
 # libnice 2021-02-21 11:10 (post 0.1.18)
-RUN apt-get -y --no-install-recommends install ninja-build meson && \
-    apt-get remove -y libnice-dev libnice10 && \
-    apt-get install -y gtk-doc-tools libgnutls28-dev && \
-    git clone https://gitlab.freedesktop.org/libnice/libnice && \
+RUN git clone https://gitlab.freedesktop.org/libnice/libnice && \
+#    apt-get -y --no-install-recommends install ninja-build meson gtk-doc-tools libgnutls28-dev && \
+#    apt-get remove -y libnice-dev libnice10 && \
     cd libnice && \
     git checkout 36aa468c4916cfccd4363f0e27af19f2aeae8604 && \
     meson --prefix=/usr build && \
