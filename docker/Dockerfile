@@ -97,8 +97,7 @@ RUN git clone -b master https://github.com/networked-aframe/janus-plugin-sfu.git
 
 COPY confs/* /usr/etc/janus/
 RUN chown -R nobody:nogroup /usr/etc/janus/
-COPY start.sh /start
-RUN chmod 775 /start
+COPY --chmod=755 start.sh /start
 
 USER nobody:nogroup
 ENTRYPOINT ["/start"]
