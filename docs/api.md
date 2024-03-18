@@ -12,8 +12,7 @@ expect consumers of this plugin to use WebSockets, but you can probably use what
 1. Signal your attachment to the Janus plugin. See the [Janus documentation][janus-transports] on how to attach to a
    plugin. This plugin's name is `janus.plugin.sfu`.
 
-2. Determine your user ID. This should be a unique ID that nobody else is likely to share. In the future, we will actually
-   have authentication; as it stands just pick a big random ID and pray for no collisions.
+2. Determine your user ID. This should be a unique ID that nobody else is likely to share. Pick a big random ID and pray for no collisions.
 
 3. Create an RTC connection.
 
@@ -55,13 +54,48 @@ join a room. You can only join one room with any connection.
     "kind": "join",
     "room_id": room ID,
     "user_id": user ID,
-    "subscribe": [none|subscription object]
+    "subscribe": {
+        "notifications": [none|boolean],
+        "data": [none|boolean],
+        "media": [none|user ID]
+    },
+    "token": [none|string]
 }
 ```
 
-If `subscription: {...}` is passed, you will synchronously configure an initial subscription to the traffic that you
-want to get pushed through your connection. The format of the subscription should be identical to that in the
-[subscribe](#subscribe) message, below.
+If `notifications` is `true`, you will get websocket events corresponding to every time someone joins or leaves the server, someone blocked or unblocked you.
+
+If `data` is `true`, you will get all data traffic from other users (publishers) in your room. You can also send data. Currently this flag is used to register the
+connection as a publisher, if false or not defined the connection is registered as a subscriber.
+
+If `media` is a user ID, the server will respond with a JSEP offer which you can use to establish a connection suitable to receive audio and video RTP data coming from that user ID.
+
+Although `subscribe: {...}` can be omitted and is valid, it doesn't
+make much sense to register a connection that does nothing.
+
+This is usually used as follow for a publisher connection:
+
+    "subscribe": {
+        "notifications": true,
+        "data": true
+    }
+
+to send data, receive data, and subscribe to notifications in the currently-joined room.
+
+And for a subscriber connection:
+
+    "subscribe": {
+        "media": user ID
+    }
+
+`token` is a JWT to verify you allowed to connect to the room `room_id`, this is verified if you specified an `auth_key` to a public RSA key in DER format in `janus.plugin.sfu.cfg`. The JWT contains the following claims:
+
+```
+{kick_users: [true|false], join_hub: true, room_ids: ["room_alpha"]}
+```
+
+`room_ids` is optional. If `room_ids` is not specified, you can connect to the room `room_id` if `join_hub` is `true`.
+If `room_ids` is specified, `room_id` needs to be listed in `room_ids` to be able to connect to the room.
 
 The response will return the users on the server in the room you joined, as below, including yourself. If you `subscribe`d to a user's media, you will also get a JSEP offer you can use to get that user's RTP traffic.
 
@@ -69,29 +103,52 @@ The response will return the users on the server in the room you joined, as belo
 {
     "success": true,
     "response": {
-        "users": {room_alpha: ["123", "789"]}
+        "users": {"room_alpha": ["123", "789"]}
     }
 }
 ```
 
 ### Subscribe
 
-Subscribes to some kind of traffic coming from the server.
+Subscribes to audio/video of a user (publisher) if you know the user ID.
+This message is only useful if you're using an external user presence system
+to know the participants currently in the room.
+With this plugin alone, you can't know a publisher user ID without
+being a publisher in the room to get the users in the room, and in this case
+you use the Join message to subscribe to other users, not this message.
 
 ```
 {
     "kind": "subscribe",
-    "notifications": [none|boolean],
-    "data": [none|boolean],
-    "media": [none|user ID]
+    "what": {
+        "notifications": [none|boolean],
+        "data": [none|boolean],
+        "media": [none|user ID]
+    },
+    "token": [none|string]
 }
 ```
 
-If `notifications` is `true`, you will get websocket events corresponding to every time someone joins or leaves the server.
-
-If `data` is `true`, you will get all data traffic from other users in your room, if you've joined a room.
+`notifications` and `data` are completely ignored here. Those flags are only
+checked for a publisher connection with the Join message.
 
 If `media` is a user ID, the server will respond with a JSEP offer which you can use to establish a connection suitable to receive audio and video RTP data coming from that user ID.
+
+If `token` is specified, `room_ids` claim is present in the JWT and `auth_key` configured, the following security check is done:
+the user is allowed to subscribe to a publisher user ID (specified in `media`) if this publisher is connected to a room listed in the JWT `room_ids`.
+
+### Kick
+
+Kick another user from the room. You need a token with the `kick_users: true` claim.
+
+```
+{
+    "kind": "kick",
+    "room_id": room ID,
+    "user_id": user ID,
+    "token": string
+}
+```
 
 ### Block
 
@@ -101,7 +158,7 @@ theirs. That user will get a `blocked` event letting them know.
 ```
 {
     "kind": "block",
-    "whom": [user ID]
+    "whom": user ID
 }
 ```
 
@@ -114,7 +171,7 @@ Unblock a user who you previously blocked. That user will get an `unblocked` eve
 ```
 {
     "kind": "block",
-    "whom": [user ID]
+    "whom": user ID
 }
 ```
 

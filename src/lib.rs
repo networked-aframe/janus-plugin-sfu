@@ -568,27 +568,62 @@ fn process_unblock(from: &Arc<Session>, whom: UserId) -> MessageResult {
     }
 }
 
-// fn process_subscribe(from: &Arc<Session>, what: &Subscription) -> MessageResult {
-//     janus_info!("Processing subscription from {:p}: {:?}", from.handle, what);
-//     if let Err(_existing) = from.subscription.set(what.clone()) {
-//         return Err(From::from("Users may only subscribe once!"));
-//     }
+fn process_subscribe(from: &Arc<Session>, what: Subscription, token: Option<String>) -> MessageResult {
+    janus_info!("Processing subscription from {:p}: {:?}", from.handle, what);
+    if let Err(_existing) = from.subscription.set(what.clone()) {
+        return Err(From::from("Users may only subscribe once!"));
+    }
 
-//     let mut switchboard = SWITCHBOARD.write()?;
-//     if let Some(ref publisher_id) = what.media {
-//         let publisher = switchboard
-//             .get_publisher(publisher_id)
-//             .ok_or("Can't subscribe to a nonexistent publisher.")?
-//             .clone();
-//         let jsep = json!({
-//             "type": "offer",
-//             "sdp": publisher.subscriber_offer.lock().unwrap().as_ref().unwrap()
-//         });
-//         switchboard.subscribe_to_user(from.clone(), publisher);
-//         return Ok(MessageResponse::new(json!({}), jsep));
-//     }
-//     Ok(MessageResponse::msg(json!({})))
-// }
+    let mut switchboard = SWITCHBOARD.write()?;
+    if let Some(ref publisher_id) = what.media {
+        let publisher = switchboard
+            .get_publisher(publisher_id)
+            .ok_or("Can't subscribe to a nonexistent publisher.")?
+            .clone();
+
+        let config = CONFIG.get().unwrap();
+        match (&config.auth_key, token) {
+            (None, _) => {
+                janus_verb!(
+                    "No auth_key configured. Allowing subscription from {:p} to publisher {}.",
+                    from.handle,
+                    publisher_id
+                );
+            }
+            (Some(_), None) => {
+                janus_warn!("Rejecting anonymous subscription from {:p} to publisher {}.", from.handle, publisher_id);
+                return Err(From::from("Rejecting anonymous subscription!"));
+            }
+            (Some(key), Some(ref token)) => match ValidatedToken::from_str(token, key) {
+                Ok(ref claims) => {
+                    if let Some(joined) = publisher.join_state.get() {
+                        if claims.may_join(&joined.room_id) {
+                            janus_verb!("Allowing subscription from {:p} to publisher {}.", from.handle, publisher_id);
+                        } else {
+                            janus_warn!("Rejecting subscription from {:p} to publisher {}.", from.handle, publisher_id);
+                            return Err(From::from("Rejecting subscription without permission!"));
+                        }
+                    } else {
+                        janus_warn!("Cannot subscribe from {:p} to a publisher {} not in a room.", from.handle, publisher_id);
+                        return Err(From::from("Cannot subscribe to a publisher not in a room."));
+                    }
+                }
+                Err(e) => {
+                    janus_warn!("Rejecting subscription from {:p} to publisher {}. Error: {}", from.handle, publisher_id, e);
+                    return Err(From::from("Rejecting subscription with invalid token!"));
+                }
+            },
+        }
+
+        let jsep = json!({
+            "type": "offer",
+            "sdp": publisher.subscriber_offer.lock().unwrap().as_ref().unwrap()
+        });
+        switchboard.subscribe_to_user(from.clone(), publisher);
+        return Ok(MessageResponse::new(json!({}), jsep));
+    }
+    Ok(MessageResponse::msg(json!({})))
+}
 
 fn process_data(from: &Arc<Session>, whom: Option<UserId>, body: &str) -> MessageResult {
     janus_huge!("Processing data message from {:p}: {:?}", from.handle, body);
@@ -616,9 +651,7 @@ fn process_message(from: &Arc<Session>, msg: MessageKind) -> MessageResult {
             token,
         } => process_join(from, room_id, user_id, subscribe, token),
         MessageKind::Kick { room_id, user_id, token } => process_kick(from, room_id, user_id, token),
-        // process_subscribe doesn't check the JWT, we need to change the API to add room_id and token,
-        // comment it for now.
-        // MessageKind::Subscribe { what } => process_subscribe(from, &what),
+        MessageKind::Subscribe { what, token } => process_subscribe(from, what, token),
         MessageKind::Block { whom } => process_block(from, whom),
         MessageKind::Unblock { whom } => process_unblock(from, whom),
         MessageKind::Data { whom, body } => process_data(from, whom, &body),
