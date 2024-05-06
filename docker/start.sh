@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 ADMIN_SECRET=${ADMIN_SECRET:-janusoverlord}
 DEBUG_LEVEL=${DEBUG_LEVEL:-4}
@@ -52,7 +53,7 @@ fi
 if [ ! -z "$ALLOW_LOOP_INDICATION" ]; then
     sed -i \
         -e "s|#allow_loop_indication =.*|allow_loop_indication = ${ALLOW_LOOP_INDICATION}|" \
-        /usr/etc/janus/janus.cfg
+        /usr/etc/janus/janus.jcfg
 fi
 
 MAX_ROOM_SIZE=${MAX_ROOM_SIZE:-30}
