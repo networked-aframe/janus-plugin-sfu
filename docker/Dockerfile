@@ -89,9 +89,11 @@ RUN git clone https://github.com/sctplab/usrsctp.git && \
 ENV JANUS_COMMIT="a7767ad30b803d96e11b491547bcf5660cb7a937"
 ENV JANUS_DEBUG_CFLAGS="-O1 -g -ggdb3 -fsanitize=address -fno-sanitize-recover=all -fsanitize-address-use-after-scope"
 ENV JANUS_DEBUG_LDFLAGS="-fsanitize=address"
+COPY g_list_free_pts.patch /
 RUN git clone -b 0.x https://github.com/meetecho/janus-gateway.git && \
     cd janus-gateway && \
     git checkout ${JANUS_COMMIT} && \
+    patch -p1 < ../g_list_free_pts.patch && \
     sh autogen.sh &&  \
     CFLAGS="${CFLAGS} ${JANUS_DEBUG_CFLAGS} -fno-omit-frame-pointer" LDFLAGS="${JANUS_DEBUG_LDFLAGS}" ./configure --prefix=/usr --disable-all-plugins --disable-all-handlers && \
     make && make install && make configs && \
