@@ -91,7 +91,7 @@ RUN git clone -b 0.x https://github.com/meetecho/janus-gateway.git && \
 
 RUN git clone -b master https://github.com/networked-aframe/janus-plugin-sfu.git && \
     cd janus-plugin-sfu && \
-    git checkout 1914dfa7e22c793f4a684ebeb002304661270519 && \
+    git checkout d7bc08d4560a96c59f4ece2fa572e75c72288194 && \
     echo version 2 increment this line to invalidate cache of this layer while iterating build during development && \
     cargo build --release && \
     mkdir -p /usr/lib/janus/plugins && \
