@@ -714,7 +714,7 @@ fn push_response(from: &Session, txn: &TransactionId, body: &JsonValue, jsep: Op
     JanusError::from(push_event(
         from.as_ptr(),
         &PLUGIN as *const Plugin as *mut Plugin,
-        txn.0,
+        txn.as_ptr(),
         serde_to_jansson(body).as_mut_ref(),
         serde_to_jansson(&jsep).as_mut_ref(),
     ))
@@ -771,7 +771,7 @@ extern "C" fn handle_message(
         Ok(sess) => {
             let msg = RawMessage {
                 from: Arc::downgrade(&sess),
-                txn: TransactionId(transaction),
+                txn: unsafe { TransactionId::from_raw(transaction) },
                 msg: unsafe { JanssonValue::from_raw(message) },
                 jsep: unsafe { JanssonValue::from_raw(jsep) },
             };
