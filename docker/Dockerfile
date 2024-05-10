@@ -11,7 +11,7 @@ FROM ubuntu:24.04
 # Look at the version used in
 # https://github.com/meetecho/janus-gateway/blob/master/.github/workflows/janus-ci.yml
 
-# For a debug build with libasan, remove cargo from apt list, add libasan8, uncomment JANUS_DEBUG_CFLAGS and JANUS_DEBUG_LDFLAGS and use the janus-plugin-sfu debug intructions.
+# For a debug build with libasan, remove cargo from apt list, add libasan8, uncomment JANUS_DEBUG_CFLAGS and JANUS_DEBUG_LDFLAGS and use the janus-plugin-sfu debug instructions.
 # Run with:
 # docker run --net=host -e EVENT_LOOPS=4 -e MESSAGE_THREADS=1 janus:latest
 # to see the memory leaks on stdout when you ctrl+c the container if any. Using docker compose up don't show anything.
@@ -34,8 +34,8 @@ RUN apt-get -y update && DEBIAN_FRONTEND="noninteractive" TZ="Europe/Paris" apt-
     cmake \
     unzip \
     zip \
-#    cargo \
-    libasan8 \
+    cargo \
+#    libasan8 \
     wget \
     curl \
     iproute2 && \
@@ -87,8 +87,8 @@ RUN git clone https://github.com/sctplab/usrsctp.git && \
 
 # 2024-05-09 12:46 (post v0.14.2 from 0.x branch)
 ENV JANUS_COMMIT="a7767ad30b803d96e11b491547bcf5660cb7a937"
-ENV JANUS_DEBUG_CFLAGS="-O1 -g -ggdb3 -fsanitize=address -fno-sanitize-recover=all -fsanitize-address-use-after-scope"
-ENV JANUS_DEBUG_LDFLAGS="-fsanitize=address"
+# ENV JANUS_DEBUG_CFLAGS="-O1 -g -ggdb3 -fsanitize=address -fno-sanitize-recover=all -fsanitize-address-use-after-scope"
+# ENV JANUS_DEBUG_LDFLAGS="-fsanitize=address"
 COPY g_list_free_pts.patch /
 RUN git clone -b 0.x https://github.com/meetecho/janus-gateway.git && \
     cd janus-gateway && \
@@ -101,29 +101,27 @@ RUN git clone -b 0.x https://github.com/meetecho/janus-gateway.git && \
 
 ENV JANUS_SFU_COMMIT="4226d0091b386576d221988c76e11c0d0ef7d215"
 # janus-plugin-sfu release build:
-#RUN git clone -b master https://github.com/networked-aframe/janus-plugin-sfu.git && \
-#    cd janus-plugin-sfu && \
-#    git checkout ${JANUS_SFU_COMMIT} && \
-#    echo version 2 increment this line to invalidate cache of this layer while iterating build during development && \
-#    cargo build --release && \
-#    mkdir -p /usr/lib/janus/plugins && \
-#    mkdir -p /usr/lib/janus/events && \
-#    cp target/release/libjanus_plugin_sfu.so /usr/lib/janus/plugins && \
-#    cd / && rm -rf janus-plugin-sfu ~/.cargo
-
-# janus-plugin-sfu debug build:
-RUN git clone -b master https://github.com/networked-aframe/janus-plugin-sfu.git janus-plugin-sfu && \
+RUN git clone -b master https://github.com/networked-aframe/janus-plugin-sfu.git && \
     cd janus-plugin-sfu && \
     git checkout ${JANUS_SFU_COMMIT} && \
-    echo version 2 increment this line to invalidate cache of this layer while iterating build during development && \
-    curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y && \
-    . "$HOME/.cargo/env" && \
-    rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu && \
-    RUSTFLAGS=-Zsanitizer=address cargo build -Zbuild-std --target x86_64-unknown-linux-gnu && \
+    cargo build --release && \
     mkdir -p /usr/lib/janus/plugins && \
     mkdir -p /usr/lib/janus/events && \
-    cp target/x86_64-unknown-linux-gnu/debug/libjanus_plugin_sfu.so /usr/lib/janus/plugins && \
+    cp target/release/libjanus_plugin_sfu.so /usr/lib/janus/plugins && \
     cd / && rm -rf janus-plugin-sfu ~/.cargo
+
+# janus-plugin-sfu debug build:
+# RUN git clone -b master https://github.com/networked-aframe/janus-plugin-sfu.git janus-plugin-sfu && \
+#     cd janus-plugin-sfu && \
+#     git checkout ${JANUS_SFU_COMMIT} && \
+#     curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y && \
+#     . "$HOME/.cargo/env" && \
+#     rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu && \
+#     RUSTFLAGS=-Zsanitizer=address cargo build -Zbuild-std --target x86_64-unknown-linux-gnu && \
+#     mkdir -p /usr/lib/janus/plugins && \
+#     mkdir -p /usr/lib/janus/events && \
+#     cp target/x86_64-unknown-linux-gnu/debug/libjanus_plugin_sfu.so /usr/lib/janus/plugins && \
+#     cd / && rm -rf janus-plugin-sfu ~/.cargo
 
 COPY confs/* /usr/etc/janus/
 RUN chown -R nobody:nogroup /usr/etc/janus/
