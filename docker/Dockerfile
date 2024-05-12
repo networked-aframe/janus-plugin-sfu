@@ -1,20 +1,16 @@
-FROM ubuntu:24.04
-# If you want to build the docker image on Raspberry Pi OS (based on debian bullseye)
+ARG IMAGE=ubuntu:24.04
+FROM $IMAGE AS build
+# If you want to build the docker image on Raspberry Pi OS (based on debian bookworm)
 # and then copy the build artifacts on the host to run janus without docker,
-# comment "FROM ubuntu:20.04" and uncomment those two lines:
-# FROM debian:bullseye
-# RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal
-# Installing rustup is needed to have a recent cargo version (1.61.0),
-# ubuntu:20.04 uses cargo 1.57.0 that is recent enough, but debian:bullseye uses cargo 1.46.0
-# that has an issue that produces the error "error inflating zlib stream; class=Zlib" when getting crate dependencies.
+# change the base image with docker build --build-arg="IMAGE=debian:bookworm"
 #
 # Look at the version used in
 # https://github.com/meetecho/janus-gateway/blob/master/.github/workflows/janus-ci.yml
 
-# For a debug build with libasan, add libasan8 to apt list, uncomment JANUS_DEBUG_CFLAGS and JANUS_DEBUG_LDFLAGS and use the janus-plugin-sfu debug instructions.
+# For a debug build with libasan, add libasan8 to apt list in the two phases, uncomment JANUS_DEBUG_CFLAGS and JANUS_DEBUG_LDFLAGS and use the janus-plugin-sfu debug instructions.
 # Run with:
 # docker run --net=host -e EVENT_LOOPS=4 -e MESSAGE_THREADS=1 janus:latest
-# to see the memory leaks on stdout when you ctrl+c the container if any. Using docker compose up don't show anything.
+# to see the memory leaks on stdout when you ctrl+c the container if any. Using docker compose up doesn't show anything.
 
 RUN apt-get -y update && DEBIAN_FRONTEND="noninteractive" TZ="Europe/Paris" apt-get install -y libmicrohttpd-dev \
     libjansson-dev \
@@ -123,6 +119,23 @@ RUN git clone -b master https://github.com/networked-aframe/janus-plugin-sfu.git
 #     mkdir -p /usr/lib/janus/events && \
 #     cp target/x86_64-unknown-linux-gnu/debug/libjanus_plugin_sfu.so /usr/lib/janus/plugins && \
 #     cd / && rm -rf janus-plugin-sfu ~/.cargo
+
+FROM $IMAGE
+RUN apt-get -y update && DEBIAN_FRONTEND="noninteractive" apt-get install -y \
+    libmicrohttpd12 \
+    libconfig9 \
+    libglib2.0-0 \
+    libjansson4 \
+#    libasan8 \
+    curl \
+    iproute2 && \
+    rm -rf /var/lib/apt/lists/*
+COPY --from=build /usr/lib/libwebsockets.so* /usr/lib/
+COPY --from=build /usr/lib/libsrtp2.so* /usr/lib/
+COPY --from=build /usr/lib/libnice.so* /usr/lib/
+COPY --from=build /usr/lib/libusrsctp.so* /usr/lib/
+COPY --from=build /usr/lib/janus /usr/lib/janus
+COPY --from=build /usr/bin/janus /usr/bin/janus
 
 COPY confs/* /usr/etc/janus/
 RUN chown -R nobody:nogroup /usr/etc/janus/
