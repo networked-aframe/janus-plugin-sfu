@@ -11,7 +11,7 @@ FROM ubuntu:24.04
 # Look at the version used in
 # https://github.com/meetecho/janus-gateway/blob/master/.github/workflows/janus-ci.yml
 
-# For a debug build with libasan, remove cargo from apt list, add libasan8, uncomment JANUS_DEBUG_CFLAGS and JANUS_DEBUG_LDFLAGS and use the janus-plugin-sfu debug instructions.
+# For a debug build with libasan, add libasan8 to apt list, uncomment JANUS_DEBUG_CFLAGS and JANUS_DEBUG_LDFLAGS and use the janus-plugin-sfu debug instructions.
 # Run with:
 # docker run --net=host -e EVENT_LOOPS=4 -e MESSAGE_THREADS=1 janus:latest
 # to see the memory leaks on stdout when you ctrl+c the container if any. Using docker compose up don't show anything.
@@ -34,7 +34,6 @@ RUN apt-get -y update && DEBIAN_FRONTEND="noninteractive" TZ="Europe/Paris" apt-
     cmake \
     unzip \
     zip \
-    cargo \
 #    libasan8 \
     wget \
     curl \
@@ -104,6 +103,8 @@ ENV JANUS_SFU_COMMIT="4226d0091b386576d221988c76e11c0d0ef7d215"
 RUN git clone -b master https://github.com/networked-aframe/janus-plugin-sfu.git && \
     cd janus-plugin-sfu && \
     git checkout ${JANUS_SFU_COMMIT} && \
+    curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal && \
+    . "$HOME/.cargo/env" && \
     cargo build --release && \
     mkdir -p /usr/lib/janus/plugins && \
     mkdir -p /usr/lib/janus/events && \
