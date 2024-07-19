@@ -80,17 +80,15 @@ RUN git clone https://github.com/sctplab/usrsctp.git && \
     cd / && rm -rf usrsctp
 
 
-# 2024-05-09 12:46 (post v0.14.2 from 0.x branch)
-ENV JANUS_COMMIT="a7767ad30b803d96e11b491547bcf5660cb7a937"
-# ENV JANUS_DEBUG_CFLAGS="-O1 -g -ggdb3 -fsanitize=address -fno-sanitize-recover=all -fsanitize-address-use-after-scope"
+# 2024-06-20 (v0.14.3 from 0.x branch)
+ENV JANUS_COMMIT="6ebd7dbbb7a62d08f3a441db39cde07e63259bfd"
+# ENV JANUS_DEBUG_CFLAGS="-O0 -g3 -ggdb3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize=address -fsanitize-address-use-after-scope -fno-sanitize-recover=all"
 # ENV JANUS_DEBUG_LDFLAGS="-fsanitize=address"
-COPY g_list_free_pts.patch /
 RUN git clone -b 0.x https://github.com/meetecho/janus-gateway.git && \
     cd janus-gateway && \
     git checkout ${JANUS_COMMIT} && \
-    patch -p1 < ../g_list_free_pts.patch && \
     sh autogen.sh &&  \
-    CFLAGS="${CFLAGS} ${JANUS_DEBUG_CFLAGS} -fno-omit-frame-pointer" LDFLAGS="${JANUS_DEBUG_LDFLAGS}" ./configure --prefix=/usr --disable-all-plugins --disable-all-handlers && \
+    CFLAGS="${CFLAGS} ${JANUS_DEBUG_CFLAGS}" LDFLAGS="${JANUS_DEBUG_LDFLAGS}" ./configure --prefix=/usr --disable-all-plugins --disable-all-handlers && \
     make && make install && make configs && \
     cd / && rm -rf janus-gateway
 
