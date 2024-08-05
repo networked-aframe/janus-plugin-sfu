@@ -17,7 +17,6 @@ use janus_plugin::{
 };
 use messages::{JsepKind, MessageKind, OptionalField, Subscription};
 use messages::{RoomId, UserId};
-use once_cell::sync::{Lazy, OnceCell};
 use serde::de::DeserializeOwned;
 use serde_json::json;
 use serde_json::Value as JsonValue;
@@ -30,7 +29,7 @@ use std::path::Path;
 use std::ptr;
 use std::slice;
 use std::sync::atomic::{AtomicBool, AtomicIsize, AtomicUsize, Ordering};
-use std::sync::{mpsc, Arc, Mutex, RwLock, Weak};
+use std::sync::{mpsc, Arc, LazyLock, Mutex, OnceLock, RwLock, Weak};
 use std::thread;
 use switchboard::Switchboard;
 use txid::TransactionId;
@@ -112,16 +111,16 @@ fn gateway_callbacks() -> &'static PluginCallbacks {
 
 /// The data structure mapping plugin handles between publishers (people sending audio) and subscribers
 /// (people in the same room who are supposed to hear the audio.)
-static SWITCHBOARD: Lazy<RwLock<Switchboard>> = Lazy::new(|| RwLock::new(Switchboard::new()));
+static SWITCHBOARD: LazyLock<RwLock<Switchboard>> = LazyLock::new(|| RwLock::new(Switchboard::new()));
 
 /// The producer/consumer queue storing incoming plugin messages to be processed.
-static MESSAGE_SENDERS: OnceCell<Vec<mpsc::SyncSender<RawMessage>>> = OnceCell::new();
+static MESSAGE_SENDERS: OnceLock<Vec<mpsc::SyncSender<RawMessage>>> = OnceLock::new();
 
 /// Counts the number of messages handled. Used for round-robin dispatching to handler threads.
 static MESSAGE_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
 /// The plugin configuration, read from disk.
-static CONFIG: OnceCell<Config> = OnceCell::new();
+static CONFIG: OnceLock<Config> = OnceLock::new();
 
 // todo: clean up duplication here
 
@@ -304,9 +303,9 @@ extern "C" fn destroy() {
 extern "C" fn create_session(handle: *mut PluginSession, error: *mut c_int) {
     let initial_state = SessionState {
         destroyed: AtomicBool::new(false),
-        join_state: OnceCell::new(),
+        join_state: OnceLock::new(),
         subscriber_offer: Arc::new(Mutex::new(None)),
-        subscription: OnceCell::new(),
+        subscription: OnceLock::new(),
         fir_seq: AtomicIsize::new(0),
     };
 
