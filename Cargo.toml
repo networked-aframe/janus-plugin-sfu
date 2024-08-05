@@ -10,7 +10,7 @@ license = "MPL-2.0"
 publish = false
 
 [lib]
-crate_type = ["cdylib"]
+crate-type = ["cdylib"]
 
 [profile.release]
 lto = true
