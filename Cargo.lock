@@ -209,7 +209,6 @@ dependencies = [
  "janus-plugin",
  "jsonwebtoken",
  "num_cpus",
- "once_cell",
  "rust-ini",
  "serde",
  "serde_json",

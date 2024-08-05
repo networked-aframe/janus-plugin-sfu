@@ -1,10 +1,9 @@
 use crate::messages::{RoomId, Subscription, UserId};
 use janus_plugin::sdp::Sdp;
 use janus_plugin::session::SessionWrapper;
-use once_cell::sync::OnceCell;
 /// Types for representing Janus session state.
 use std::sync::atomic::{AtomicBool, AtomicIsize};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, OnceLock};
 
 /// Once they join a room, all sessions are classified as either subscribers or publishers.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -42,13 +41,13 @@ pub struct SessionState {
     pub fir_seq: AtomicIsize,
 
     /// Information pertaining to this session's user and room, if joined.
-    pub join_state: OnceCell<JoinState>,
+    pub join_state: OnceLock<JoinState>,
 
     // todo: these following fields should be unified with the JoinState, but it's
     // annoying in practice because they are established during JSEP negotiation
     // rather than during the join flow
     /// If this is a subscriber, the subscription this user has established, if any.
-    pub subscription: OnceCell<Subscription>,
+    pub subscription: OnceLock<Subscription>,
 
     /// If this is a publisher, the offer for subscribing to it.
     pub subscriber_offer: Arc<Mutex<Option<Sdp>>>,
