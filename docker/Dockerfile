@@ -70,18 +70,18 @@ RUN git clone https://gitlab.freedesktop.org/libnice/libnice && \
 
 
 # datachannel build
-# Apr 17, 2024 master c4b52c34d4a7ecca6c992ba2f7f09607997d8ead
+# Aug 22, 2024 master a07d9a846480f072fe53cd9f55fd014077d532af
 RUN git clone https://github.com/sctplab/usrsctp.git && \
     cd usrsctp && \
-    git checkout c4b52c34d4a7ecca6c992ba2f7f09607997d8ead && \
+    git checkout a07d9a846480f072fe53cd9f55fd014077d532af && \
     ./bootstrap && \
     ./configure --prefix=/usr --disable-static --disable-programs --disable-inet --disable-inet6 && \
     make && make install && \
     cd / && rm -rf usrsctp
 
 
-# 2024-06-20 (v0.14.3 from 0.x branch)
-ENV JANUS_COMMIT="6ebd7dbbb7a62d08f3a441db39cde07e63259bfd"
+# 2024-09-10 (v0.14.4 from 0.x branch)
+ENV JANUS_COMMIT="4353b83ffb97775c5b97c09177690a2f09494eed"
 # ENV JANUS_DEBUG_CFLAGS="-O0 -g3 -ggdb3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize=address -fsanitize-address-use-after-scope -fno-sanitize-recover=all"
 # ENV JANUS_DEBUG_LDFLAGS="-fsanitize=address"
 RUN git clone -b 0.x https://github.com/meetecho/janus-gateway.git && \
