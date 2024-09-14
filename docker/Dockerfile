@@ -92,7 +92,7 @@ RUN git clone -b 0.x https://github.com/meetecho/janus-gateway.git && \
     make && make install && make configs && \
     cd / && rm -rf janus-gateway
 
-ENV JANUS_SFU_COMMIT="190cf1faf8641b6bd505229babcd87e820a46f4e"
+ENV JANUS_SFU_COMMIT="44583e61acb8accee677deac6b44059c2b8df3da"
 # janus-plugin-sfu release build:
 RUN git clone -b master https://github.com/networked-aframe/janus-plugin-sfu.git && \
     cd janus-plugin-sfu && \
