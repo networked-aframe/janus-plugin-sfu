@@ -1,7 +1,7 @@
 services:
   janus:
     network_mode: host
-    restart: always
+    restart: unless-stopped
     build: .
     image: janus:latest
     environment:
