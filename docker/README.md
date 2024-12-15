@@ -91,13 +91,13 @@ docker build --pull --no-cache -t janus:latest .
 start the container:
 
 ```
-docker run -d --restart always --net=host --name="janus" -e MAX_ROOM_SIZE=15 -e ADMIN_SECRET=YourOwnPassword janus:latest
+docker run -d --restart unless-stopped --net=host --name="janus" -e MAX_ROOM_SIZE=15 -e ADMIN_SECRET=YourOwnPassword janus:latest
 ```
 
 If you secure the rooms with JWT, specify the public key like this:
 
 ```
-docker run -d --restart always --net=host --name="janus" -e MAX_ROOM_SIZE=15 -e ADMIN_SECRET=YourOwnPassword -e AUTH_KEY=/keys/public.der -v $PWD/public.der:/keys/public.der:ro janus:latest
+docker run -d --restart unless-stopped --net=host --name="janus" -e MAX_ROOM_SIZE=15 -e ADMIN_SECRET=YourOwnPassword -e AUTH_KEY=/keys/public.der -v $PWD/public.der:/keys/public.der:ro janus:latest
 ```
 
 look at the logs:
